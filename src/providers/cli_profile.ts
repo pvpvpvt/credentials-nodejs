@@ -9,6 +9,7 @@ import StaticAKCredentialsProvider from './static_ak';
 import RAMRoleARNCredentialsProvider from './ram_role_arn';
 import OIDCRoleArnCredentialsProvider from './oidc_role_arn';
 import ECSRAMRoleCredentialsProvider from './ecs_ram_role';
+import Config from '../configure/config';
 
 const readFileAsync = promisify(readFile);
 
@@ -17,13 +18,13 @@ class CLIProfileCredentialsProviderBuilder {
   build(): CLIProfileCredentialsProvider {
     // 优先级：
     // 1. 使用显示指定的 profileName
-    // 2. 使用环境变量（ALIBABA_CLOUD_PROFILE）制定的 profileName
+    // 2. 使用环境变量制定的 profileName
     // 3. 使用 CLI 配置中的当前 profileName
     if (!this.profileName) {
-      this.profileName = process.env.ALIBABA_CLOUD_PROFILE;
+      this.profileName = process.env[Config.ENV_PREFIX+ 'PROFILE'];
     }
 
-    if (process.env.ALIBABA_CLOUD_CLI_PROFILE_DISABLED && process.env.ALIBABA_CLOUD_CLI_PROFILE_DISABLED.toLowerCase() === 'true') {
+    if (process.env[Config.ENV_PREFIX+ 'CLI_PROFILE_DISABLED'] && process.env[Config.ENV_PREFIX+ 'CLI_PROFILE_DISABLED'].toLowerCase() === 'true') {
       throw new Error('the CLI profile is disabled');
     }
 

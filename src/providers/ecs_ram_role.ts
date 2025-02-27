@@ -209,17 +209,17 @@ class ECSRAMRoleCredentialsProviderBuilder {
 
   build(): ECSRAMRoleCredentialsProvider {
     // 允许通过环境变量强制关闭 IMDS
-    if (process.env.ALIBABA_CLOUD_ECS_METADATA_DISABLED && process.env.ALIBABA_CLOUD_ECS_METADATA_DISABLED.toLowerCase() === 'true') {
+    if (process.env[Config.ENV_PREFIX+ 'ECS_METADATA_DISABLED'] && process.env[Config.ENV_PREFIX+ 'ECS_METADATA_DISABLED'].toLowerCase() === 'true') {
       throw new Error('IMDS credentials is disabled');
     }
 
     // 设置 roleName 默认值
     if (!this.roleName) {
-      this.roleName = process.env.ALIBABA_CLOUD_ECS_METADATA;
+      this.roleName = process.env[Config.ENV_PREFIX+ 'ECS_METADATA'];
     }
 
     // 允许通过环境变量强制关闭 V1
-    if (process.env.ALIBABA_CLOUD_IMDSV1_DISABLED && process.env.ALIBABA_CLOUD_IMDSV1_DISABLED.toLowerCase() === 'true') {
+    if (process.env[Config.ENV_PREFIX+ 'IMDSV1_DISABLED'] && process.env[Config.ENV_PREFIX+ 'IMDSV1_DISABLED'].toLowerCase() === 'true') {
       this.disableIMDSv1 = true;
     }
 

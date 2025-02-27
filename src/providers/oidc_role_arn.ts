@@ -80,15 +80,15 @@ class OIDCRoleArnCredentialsProviderBuilder {
   build(): OIDCRoleArnCredentialsProvider {
     // set default values
     if (!this.oidcProviderArn) {
-      this.oidcProviderArn = process.env.ALIBABA_CLOUD_OIDC_PROVIDER_ARN;
+      this.oidcProviderArn = process.env[Config.ENV_PREFIX+ 'OIDC_PROVIDER_ARN;
     }
 
     if (!this.oidcTokenFilePath) {
-      this.oidcTokenFilePath = process.env.ALIBABA_CLOUD_OIDC_TOKEN_FILE;
+      this.oidcTokenFilePath = process.env[Config.ENV_PREFIX+ 'OIDC_TOKEN_FILE;
     }
 
     if (!this.roleSessionName) {
-      this.roleSessionName = process.env.ALIBABA_CLOUD_ROLE_SESSION_NAME;
+      this.roleSessionName = process.env[Config.ENV_PREFIX+ 'ROLE_SESSION_NAME;
     }
 
     if (!this.durationSeconds) {
@@ -96,7 +96,7 @@ class OIDCRoleArnCredentialsProviderBuilder {
     }
 
     if (!this.roleArn) {
-      this.roleArn = process.env.ALIBABA_CLOUD_ROLE_ARN;
+      this.roleArn = process.env[Config.ENV_PREFIX+ 'ROLE_ARN;
     }
 
     if (!this.roleArn) {
@@ -120,11 +120,11 @@ class OIDCRoleArnCredentialsProviderBuilder {
     }
 
     if (!this.stsRegionId) {
-      this.stsRegionId = process.env.ALIBABA_CLOUD_STS_REGION;
+      this.stsRegionId = process.env[Config.ENV_PREFIX+ 'STS_REGION;
     }
 
     if (!this.enableVpc) {
-      this.enableVpc = process.env.ALIBABA_CLOUD_VPC_ENDPOINT_ENABLED && process.env.ALIBABA_CLOUD_VPC_ENDPOINT_ENABLED.toLowerCase() === 'true' || false;
+      this.enableVpc = process.env[Config.ENV_PREFIX+ 'VPC_ENDPOINT_ENABLED && process.env[Config.ENV_PREFIX+ 'VPC_ENDPOINT_ENABLED.toLowerCase() === 'true' || false;
     }
 
     // sts endpoint

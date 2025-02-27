@@ -34,18 +34,18 @@ class RAMRoleARNCredentialsProviderBuilder {
       throw new Error('must specify a previous credentials provider to asssume role');
     }
 
-    if (!(this.roleArn = this.roleArn || process.env.ALIBABA_CLOUD_ROLE_ARN)) throw new Error('the RoleArn is empty');
+    if (!(this.roleArn = this.roleArn || process.env[Config.ENV_PREFIX+ 'ROLE_ARN)) throw new Error('the RoleArn is empty');
 
     if (!this.roleSessionName) {
-      this.roleSessionName = process.env.ALIBABA_CLOUD_ROLE_SESSION_NAME || 'credentials-nodejs-' + Date.now();
+      this.roleSessionName = process.env[Config.ENV_PREFIX+ 'ROLE_SESSION_NAME || 'credentials-nodejs-' + Date.now();
     }
 
     if (!this.stsRegionId) {
-      this.stsRegionId = process.env.ALIBABA_CLOUD_STS_REGION;
+      this.stsRegionId = process.env[Config.ENV_PREFIX+ 'STS_REGION;
     }
 
     if (!this.enableVpc) {
-      this.enableVpc = process.env.ALIBABA_CLOUD_VPC_ENDPOINT_ENABLED && process.env.ALIBABA_CLOUD_VPC_ENDPOINT_ENABLED.toLowerCase() === 'true' || false;
+      this.enableVpc = process.env[Config.ENV_PREFIX+ 'VPC_ENDPOINT_ENABLED && process.env[Config.ENV_PREFIX+ 'VPC_ENDPOINT_ENABLED.toLowerCase() === 'true' || false;
     }
 
     // duration seconds
