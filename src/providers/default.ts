@@ -6,6 +6,7 @@ import EnvironmentVariableCredentialsProvider from './env';
 import OIDCRoleArnCredentialsProvider from './oidc_role_arn';
 import URICredentialsProvider from './uri';
 import ProfileCredentialsProvider from './profile';
+import { Config } from '../configure/config';
 
 export default class DefaultCredentialsProvider implements CredentialsProvider {
   private readonly providers: CredentialsProvider[];
@@ -50,7 +51,7 @@ export default class DefaultCredentialsProvider implements CredentialsProvider {
 
     // Add IMDS
     try {
-      const ecsRamRoleProvider = ECSRAMRoleCredentialsProvider.builder().withRoleName(process.env.ALIBABA_CLOUD_ECS_METADATA).build();
+      const ecsRamRoleProvider = ECSRAMRoleCredentialsProvider.builder().withRoleName(process.env[Config.ENV_PREFIX + 'ECS_METADATA']).build();
       this.providers.push(ecsRamRoleProvider);
     } catch (ex) {
       // ignore
@@ -58,7 +59,7 @@ export default class DefaultCredentialsProvider implements CredentialsProvider {
 
     // credentials uri
     try {
-      const uriProvider = URICredentialsProvider.builder().withCredentialsURI(process.env.ALIBABA_CLOUD_CREDENTIALS_URI).build();
+      const uriProvider = URICredentialsProvider.builder().withCredentialsURI(process.env[Config.ENV_PREFIX + 'CREDENTIALS_URI']).build();
       this.providers.push(uriProvider);
     }
     catch (ex) {

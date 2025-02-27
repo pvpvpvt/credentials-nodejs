@@ -1,6 +1,7 @@
 import CredentialsProvider from '../credentials_provider'
 import { Request, doRequest } from './http'
 import { Session, SessionCredentialProvider, STALE_TIME } from './session'
+import { Config } from '../configure/config';
 
 const PREFETCH_TIME = 60 * 60;
 const defaultMetadataTokenDuration = 21600; // 6 hours
@@ -29,7 +30,7 @@ export default class ECSRAMRoleCredentialsProvider extends SessionCredentialProv
     this.connectTimeout = builder.connectTimeout;
     this.checker = null;
     this.shouldRefreshCred = false;
-    if(builder.asyncCredentialUpdateEnabled) {
+    if (builder.asyncCredentialUpdateEnabled) {
       this.checker = this.checkCredentialsUpdateAsynchronously();
     }
   }
@@ -38,10 +39,10 @@ export default class ECSRAMRoleCredentialsProvider extends SessionCredentialProv
   checkCredentialsUpdateAsynchronously(): NodeJS.Timeout {
     return setTimeout(async () => {
       try {
-        if(this.shouldRefreshCred) {
+        if (this.shouldRefreshCred) {
           await this.getCredentials();
         }
-      } catch(err) {
+      } catch (err) {
         console.error('CheckCredentialsUpdateAsynchronously Error:', err);
       } finally {
         this.checker = this.checkCredentialsUpdateAsynchronously();
@@ -57,21 +58,21 @@ export default class ECSRAMRoleCredentialsProvider extends SessionCredentialProv
   }
 
   private async getMetadataToken(): Promise<string> {
-    // PUT http://100.100.100.200/latest/api/token
+    const headerKey = Config.ECS_METADATA_HEADER_PREFIX + 'ecs-metadata-token-ttl-seconds';
+    const headers: { [key: string]: string } = {};
+    headers[headerKey] = `${defaultMetadataTokenDuration}`;
     const request = Request.builder()
       .withMethod('PUT')
       .withProtocol('http')
-      .withHost('100.100.100.200')
+      .withHost(Config.ECS_METADATA_HOST)
       .withPath('/latest/api/token')
-      .withHeaders({
-        'x-aliyun-ecs-metadata-token-ttl-seconds': `${defaultMetadataTokenDuration}`
-      })
+      .withHeaders(headers)
       .withReadTimeout(this.readTimeout || 1000)
       .withConnectTimeout(this.connectTimeout || 1000)
       .build();
 
     // ConnectTimeout: 5 * time.Second,
-    //   ReadTimeout: 5 * time.Second,
+    // ReadTimeout: 5 * time.Second,
     try {
       const response = await this.doRequest(request);
       if (response.statusCode !== 200) {
@@ -91,16 +92,17 @@ export default class ECSRAMRoleCredentialsProvider extends SessionCredentialProv
     const builder = Request.builder()
       .withMethod('GET')
       .withProtocol('http')
-      .withHost('100.100.100.200')
+      .withHost(Config.ECS_METADATA_HOST)
       .withPath('/latest/meta-data/ram/security-credentials/')
       .withReadTimeout(this.readTimeout || 1000)
       .withConnectTimeout(this.connectTimeout || 1000);
 
     const metadataToken = await this.getMetadataToken();
     if (metadataToken !== null) {
-      builder.withHeaders({
-        'x-aliyun-ecs-metadata-token': metadataToken
-      });
+      const headerKey = Config.ECS_METADATA_HEADER_PREFIX + 'ecs-metadata-token';
+      const headers: { [key: string]: string } = {};
+      headers[headerKey] = metadataToken;
+      builder.withHeaders(headers);
     }
 
     // ConnectTimeout: 5 * time.Second,
@@ -125,7 +127,7 @@ export default class ECSRAMRoleCredentialsProvider extends SessionCredentialProv
     const builder = Request.builder()
       .withMethod('GET')
       .withProtocol('http')
-      .withHost('100.100.100.200')
+      .withHost(Config.ECS_METADATA_HOST)
       .withPath(`/latest/meta-data/ram/security-credentials/${roleName}`)
       .withReadTimeout(this.readTimeout || 1000)
       .withConnectTimeout(this.connectTimeout || 1000);
@@ -136,9 +138,10 @@ export default class ECSRAMRoleCredentialsProvider extends SessionCredentialProv
 
     const metadataToken = await this.getMetadataToken();
     if (metadataToken !== null) {
-      builder.withHeaders({
-        'x-aliyun-ecs-metadata-token': metadataToken
-      });
+      const headerKey = Config.ECS_METADATA_HEADER_PREFIX + 'ecs-metadata-token';
+      const headers: { [key: string]: string } = {};
+      headers[headerKey] = metadataToken;
+      builder.withHeaders(headers);
     }
 
     const request = builder.build();
@@ -192,12 +195,12 @@ class ECSRAMRoleCredentialsProviderBuilder {
     return this;
   }
 
-  withReadTimeout(readTimeout: number): ECSRAMRoleCredentialsProviderBuilder{
+  withReadTimeout(readTimeout: number): ECSRAMRoleCredentialsProviderBuilder {
     this.readTimeout = readTimeout
     return this;
   }
 
-  withConnectTimeout(connectTimeout: number): ECSRAMRoleCredentialsProviderBuilder{
+  withConnectTimeout(connectTimeout: number): ECSRAMRoleCredentialsProviderBuilder {
     this.connectTimeout = connectTimeout
     return this;
   }
@@ -209,17 +212,17 @@ class ECSRAMRoleCredentialsProviderBuilder {
 
   build(): ECSRAMRoleCredentialsProvider {
     // 允许通过环境变量强制关闭 IMDS
-    if (process.env.ALIBABA_CLOUD_ECS_METADATA_DISABLED && process.env.ALIBABA_CLOUD_ECS_METADATA_DISABLED.toLowerCase() === 'true') {
+    if (process.env[Config.ENV_PREFIX + 'ECS_METADATA_DISABLED'] && process.env[Config.ENV_PREFIX + 'ECS_METADATA_DISABLED'].toLowerCase() === 'true') {
       throw new Error('IMDS credentials is disabled');
     }
 
     // 设置 roleName 默认值
     if (!this.roleName) {
-      this.roleName = process.env.ALIBABA_CLOUD_ECS_METADATA;
+      this.roleName = process.env[Config.ENV_PREFIX + 'ECS_METADATA'];
     }
 
     // 允许通过环境变量强制关闭 V1
-    if (process.env.ALIBABA_CLOUD_IMDSV1_DISABLED && process.env.ALIBABA_CLOUD_IMDSV1_DISABLED.toLowerCase() === 'true') {
+    if (process.env[Config.ENV_PREFIX + 'IMDSV1_DISABLED'] && process.env[Config.ENV_PREFIX + 'IMDSV1_DISABLED'].toLowerCase() === 'true') {
       this.disableIMDSv1 = true;
     }
 

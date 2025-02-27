@@ -1,8 +1,8 @@
 
-import Credentials from '../credentials';
 import CredentialsProvider from '../credentials_provider';
 import { Session, SessionCredentialProvider, STALE_TIME } from './session'
 import { Request, doRequest } from './http'
+import { Config } from '../configure/config';
 
 
 /**
@@ -85,7 +85,7 @@ export class URICredentialsProviderBuilder {
 
   public build(): URICredentialsProvider {
     if (!this.credentialsURI) {
-      this.credentialsURI = process.env.ALIBABA_CLOUD_CREDENTIALS_URI;
+      this.credentialsURI = process.env[Config.ENV_PREFIX + 'CREDENTIALS_URI'];
     }
     return new URICredentialsProvider(this);
   }

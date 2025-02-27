@@ -1,7 +1,7 @@
 {
-  "name": "@alicloud/credentials",
-  "version": "2.4.3",
-  "description": "alibaba cloud node.js sdk credentials",
+  "name": "@{{idpt}}/credentials",
+  "version": "1.0.0",
+  "description": "node.js sdk credentials",
   "main": "dist/src/client.js",
   "scripts": {
     "prepublishOnly": "tsc",
@@ -16,14 +16,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aliyun/nodejs-credentials.git"
+    "url": "http://{{credentials-typescript-git}}.git"
   },
   "keywords": [
-    "alibaba cloud",
+    "cloud",
     "sdk",
     "credentials"
   ],
-  "author": "Alibaba Cloud SDK",
+  "author": "SDK Team",
   "license": "MIT",
   "devDependencies": {
     "@types/debug": "^4.1.12",
@@ -49,10 +49,6 @@
     "ini": "^1.3.5",
     "kitx": "^2.0.0"
   },
-  "bugs": {
-    "url": "https://github.com/aliyun/nodejs-credentials/issues"
-  },
-  "homepage": "https://github.com/aliyun/nodejs-credentials#readme",
   "files": [
     "src",
     "dist"

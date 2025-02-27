@@ -8,7 +8,7 @@ import { loadIni } from '../util/utils';
 import StaticAKCredentialsProvider from './static_ak';
 import ECSRAMRoleCredentialsProvider from './ecs_ram_role';
 import RAMRoleARNCredentialsProvider from './ram_role_arn';
-import OIDCRoleArnCredentialsProvider from './oidc_role_arn'
+import { Config } from '../configure/config';
 
 export default class ProfileCredentialsProvider implements CredentialsProvider {
   private readonly profileName: string;
@@ -18,12 +18,12 @@ export default class ProfileCredentialsProvider implements CredentialsProvider {
 
   async getCredentials(): Promise<Credentials> {
     if (!this.innerProvider) {
-      let sharedCfgPath = process.env.ALIBABA_CLOUD_CREDENTIALS_FILE;
+      let sharedCfgPath = process.env[Config.ENV_PREFIX + 'CREDENTIALS_FILE'];
       if (!sharedCfgPath) {
         if (!this.homedir) {
           throw new Error('cannot found home dir');
         }
-        sharedCfgPath = path.join(this.homedir, '.alibabacloud/credentials');
+        sharedCfgPath = path.join(this.homedir, `${Config.CREDENTIAL_FILE_PATH}/credentials`);
       }
 
       const ini = await loadIni(sharedCfgPath);
@@ -100,12 +100,8 @@ class ProfileCredentialsProviderBuilder {
   }
 
   build() {
-    // 优先级：
-    // 1. 使用显示指定的 profileName
-    // 2. 使用环境变量（ALIBABA_CLOUD_PROFILE）指定的 profileName
-    // 3. 兜底使用 default 作为 profileName
     if (!this.profileName) {
-      this.profileName = process.env.ALIBABA_CLOUD_PROFILE || 'default';
+      this.profileName = process.env[Config.ENV_PREFIX + 'PROFILE'] || 'default';
     }
 
     return new ProfileCredentialsProvider(this);

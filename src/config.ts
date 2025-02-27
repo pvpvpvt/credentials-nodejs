@@ -5,7 +5,6 @@ export default class Config extends $tea.Model {
   accessKeySecret?: string;
   securityToken?: string;
   bearerToken?: string;
-  durationSeconds?: number;
   roleArn?: string;
   policy?: string;
   roleSessionExpiration?: number;
@@ -13,10 +12,8 @@ export default class Config extends $tea.Model {
   publicKeyId?: string;
   privateKeyFile?: string;
   roleName?: string;
-  enableIMDSv2?: boolean;
   disableIMDSv1: boolean;
   asyncCredentialUpdateEnabled: boolean;
-  metadataTokenDuration?: number;
   credentialsURI?: string;
   oidcProviderArn: string;
   oidcTokenFilePath: string;
@@ -32,7 +29,6 @@ export default class Config extends $tea.Model {
       accessKeySecret: 'accessKeySecret',
       securityToken: 'securityToken',
       bearerToken: 'bearerToken',
-      durationSeconds: 'durationSeconds',
       roleArn: 'roleArn',
       policy: 'policy',
       roleSessionExpiration: 'roleSessionExpiration',
@@ -46,10 +42,8 @@ export default class Config extends $tea.Model {
       publicKeyId: 'publicKeyId',
       privateKeyFile: 'privateKeyFile',
       roleName: 'roleName',
-      enableIMDSv2: 'enableIMDSv2',
       disableIMDSv1: 'disableIMDSv1',
       asyncCredentialUpdateEnabled: 'asyncCredentialUpdateEnabled',
-      metadataTokenDuration: 'metadataTokenDuration',
       credentialsURI: 'credentialsURI',
       oidcProviderArn: 'oidcProviderArn',
       oidcTokenFilePath: 'oidcTokenFilePath',
@@ -63,7 +57,6 @@ export default class Config extends $tea.Model {
       accessKeySecret: 'string',
       securityToken: 'string',
       bearerToken: 'string',
-      durationSeconds: 'number',
       roleArn: 'string',
       policy: 'string',
       roleSessionExpiration: 'number',
@@ -77,10 +70,8 @@ export default class Config extends $tea.Model {
       publicKeyId: 'string',
       privateKeyFile: 'string',
       roleName: 'string',
-      enableIMDSv2: 'boolean',
       disableIMDSv1: 'boolean',
       asyncCredentialUpdateEnabled: 'boolean',
-      metadataTokenDuration: 'number',
       credentialsURI: 'string',
       oidcProviderArn: 'string',
       oidcTokenFilePath: 'string',

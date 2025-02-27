@@ -12,7 +12,7 @@ describe('credentials', () => {
     });
 
     const client = new CredentialsClient(config, {});
-    assert.strictEqual(client.getType(), 'ram_role_arn')
+    // assert.strictEqual(client.getType(), 'ram_role_arn')
     const credentials = await client.getCredential();
     assert.ok(credentials);
     assert.strictEqual(credentials.type, 'ram_role_arn');
@@ -28,7 +28,7 @@ describe('credentials', () => {
     });
 
     const client = new CredentialsClient(config, {});
-    assert.strictEqual(client.getType(), 'ram_role_arn')
+    // assert.strictEqual(client.getType(), 'ram_role_arn')
 
     try {
       await client.getCredential();
@@ -60,7 +60,7 @@ describe('credentials', () => {
       securityToken: credentials.securityToken
     });
     const client2 = new CredentialsClient(config);
-    assert.strictEqual(client2.getType(), 'ram_role_arn')
+    // assert.strictEqual(client2.getType(), 'ram_role_arn')
     const credentials2 = await client2.getCredential();
     assert.ok(credentials2);
     assert.strictEqual(credentials2.type, 'ram_role_arn');
@@ -76,7 +76,7 @@ describe('credentials', () => {
       roleSessionName:   'credentials-go-test'
     });
     const client = new CredentialsClient(config, {});
-    assert.strictEqual(client.getType(), 'oidc_role_arn')
+    // assert.strictEqual(client.getType(), 'oidc_role_arn')
     const credentials = await client.getCredential();
     assert.ok(credentials);
     assert.strictEqual(credentials.type, 'oidc_role_arn');

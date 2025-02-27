@@ -1,6 +1,5 @@
 import ICredential from './icredential';
 
-import RsaKeyPairCredential from './rsa_key_pair_credential';
 import BearerTokenCredential from './bearer_token_credential';
 
 import Config from './config';
@@ -99,41 +98,6 @@ export default class Credential implements ICredential {
     }
   }
 
-  /**
-   * @deprecated Use getCredential() instead of
-   */
-  getAccessKeyId(): Promise<string> {
-    return this.credential.getAccessKeyId();
-  }
-
-  /**
-   * @deprecated Use getCredential() instead of
-   */
-  getAccessKeySecret(): Promise<string> {
-    return this.credential.getAccessKeySecret();
-  }
-
-  /**
-   * @deprecated Use getCredential() instead of
-   */
-  getSecurityToken(): Promise<string> {
-    return this.credential.getSecurityToken();
-  }
-
-  /**
-   * @deprecated Use getCredential() instead of
-   */
-  getBearerToken(): string {
-    return this.credential.getBearerToken();
-  }
-
-  /**
-   * @deprecated Use getCredential() instead of
-   */
-  getType(): string {
-    return this.credential.getType();
-  }
-
   getCredential(): Promise<CredentialModel> {
     return this.credential.getCredential();
   }
@@ -197,9 +161,7 @@ export default class Credential implements ICredential {
         .withRoleSessionName(config.roleSessionName)
         .withReadTimeout(config.timeout)
         .withConnectTimeout(config.connectTimeout)
-        .withEnableVpc(config.enableVpc)
         .withStsEndpoint(config.stsEndpoint)
-        .withStsRegionId(config.stsRegionId)
         .withExternalId(config.externalId)
         // .withHttpOptions(runtime)
         .build());
@@ -214,14 +176,9 @@ export default class Credential implements ICredential {
         .withPolicy(config.policy)
         .withDurationSeconds(config.roleSessionExpiration)
         .withStsEndpoint(config.stsEndpoint)
-        .withStsRegionId(config.stsRegionId)
-        .withEnableVpc(config.enableVpc)
         .withReadTimeout(config.timeout)
         .withConnectTimeout(config.connectTimeout)
         .build());
-      break;
-    case 'rsa_key_pair':
-      this.credential = new RsaKeyPairCredential(config.publicKeyId, config.privateKeyFile);
       break;
     case 'bearer':
       this.credential = new BearerTokenCredential(config.bearerToken);

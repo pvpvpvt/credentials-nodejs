@@ -33,27 +33,27 @@ export class SessionCredentialProvider implements CredentialsProvider {
 
   constructor(staleTime: number = 0, prefetchTime: number = 0) {
     this.staleTime = staleTime || STALE_TIME;
-    if(prefetchTime) {
+    if (prefetchTime) {
       this.prefetchTime = prefetchTime;
       this.prefetchTimestamp = Date.now() + (prefetchTime * 1000);
     }
-    this.refreshFaliure  = 0;
+    this.refreshFaliure = 0;
   }
 
   async getCredentials(): Promise<Credentials> {
     this.session = await this.getSession();
 
     return Credentials.builder()
-          .withAccessKeyId(this.session.accessKeyId)
-          .withAccessKeySecret(this.session.accessKeySecret)
-          .withSecurityToken(this.session.securityToken)
-          .withProviderName(this.getProviderName())
-          .build();
+      .withAccessKeyId(this.session.accessKeyId)
+      .withAccessKeySecret(this.session.accessKeySecret)
+      .withSecurityToken(this.session.securityToken)
+      .withProviderName(this.getProviderName())
+      .build();
   }
 
   refreshTimestamp() {
     this.staleTimestamp = this.expirationTimestamp - this.staleTime;
-    if(this.prefetchTimestamp) {
+    if (this.prefetchTimestamp) {
       this.prefetchTimestamp = (Date.now() + (this.prefetchTime * 1000)) / 1000;
     }
   }
@@ -84,12 +84,12 @@ export class SessionCredentialProvider implements CredentialsProvider {
         return;
       }
       // 不足或等于15分钟，但未过期，下次会再次刷新
-      if (now < (this.staleTimestamp  + this.staleTime)) {
+      if (now < (this.staleTimestamp + this.staleTime)) {
         this.expirationTimestamp = now + this.staleTime;
       }
       // 已过期，看缓存，缓存若大于15分钟，返回缓存，若小于15分钟，则根据策略判断是立刻重试还是稍后重试
-      if (now > (this.staleTimestamp  + this.staleTime)) {
-        if(oldSessionAvailable) {
+      if (now > (this.staleTimestamp + this.staleTime)) {
+        if (oldSessionAvailable) {
           this.session = oldSession;
           this.expirationTimestamp = parseUTC(oldSession.expiration) / 1000;
           this.refreshTimestamp();
@@ -98,7 +98,7 @@ export class SessionCredentialProvider implements CredentialsProvider {
         const waitUntilNextRefresh = 50 + getRandomInt(20);
         this.expirationTimestamp = now + waitUntilNextRefresh + this.staleTime;
       }
-    } catch(err) {
+    } catch (err) {
       if (!this.session) {
         throw err;
       }
@@ -111,31 +111,31 @@ export class SessionCredentialProvider implements CredentialsProvider {
     }
   }
   async getSession(): Promise<Session> {
-      if (this.needUpdateCredential() || this.shouldPrefetchCredential()) {
-        await this.refreshSession();
-        this.refreshTimestamp();
-      }
-      return this.session;
+    if (this.needUpdateCredential() || this.shouldPrefetchCredential()) {
+      await this.refreshSession();
+      this.refreshTimestamp();
+    }
+    return this.session;
+  }
+
+  needUpdateCredential(): boolean {
+    if (!this.session || !this.expirationTimestamp) {
+      return true;
     }
 
-    needUpdateCredential(): boolean {
-      if (!this.session || !this.expirationTimestamp) {
-        return true;
-      }
+    return (Date.now() / 1000) >= this.staleTimestamp;
+  }
 
-      return (Date.now() / 1000) >= this.staleTimestamp;
-    }
-  
-    shouldPrefetchCredential(): boolean {
-      if (!this.prefetchTimestamp) {
-        return false;
-      }
-  
-      return this.expirationTimestamp - (Date.now() / 1000) <= this.prefetchTime;
+  shouldPrefetchCredential(): boolean {
+    if (!this.prefetchTimestamp) {
+      return false;
     }
 
-    getProviderName(): string {
-      return 'session';
-    }
+    return this.expirationTimestamp - (Date.now() / 1000) <= this.prefetchTime;
+  }
+
+  getProviderName(): string {
+    return 'session';
+  }
 }
 

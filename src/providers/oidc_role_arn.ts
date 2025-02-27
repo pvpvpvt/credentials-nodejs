@@ -1,11 +1,11 @@
 import { readFile } from 'fs';
 import { promisify } from 'util';
 
-import Credentials from '../credentials';
 import CredentialsProvider from '../credentials_provider';
 import { Session, SessionCredentialProvider, STALE_TIME } from './session';
 import * as utils from '../util/utils';
 import { doRequest, Request } from './http';
+import { Config } from '../configure/config';
 
 const readFileAsync = promisify(readFile);
 
@@ -80,15 +80,15 @@ class OIDCRoleArnCredentialsProviderBuilder {
   build(): OIDCRoleArnCredentialsProvider {
     // set default values
     if (!this.oidcProviderArn) {
-      this.oidcProviderArn = process.env.ALIBABA_CLOUD_OIDC_PROVIDER_ARN;
+      this.oidcProviderArn = process.env[Config.ENV_PREFIX + 'OIDC_PROVIDER_ARN'];
     }
 
     if (!this.oidcTokenFilePath) {
-      this.oidcTokenFilePath = process.env.ALIBABA_CLOUD_OIDC_TOKEN_FILE;
+      this.oidcTokenFilePath = process.env[Config.ENV_PREFIX + 'OIDC_TOKEN_FILE'];
     }
 
     if (!this.roleSessionName) {
-      this.roleSessionName = process.env.ALIBABA_CLOUD_ROLE_SESSION_NAME;
+      this.roleSessionName = process.env[Config.ENV_PREFIX + 'ROLE_SESSION_NAME'];
     }
 
     if (!this.durationSeconds) {
@@ -96,19 +96,19 @@ class OIDCRoleArnCredentialsProviderBuilder {
     }
 
     if (!this.roleArn) {
-      this.roleArn = process.env.ALIBABA_CLOUD_ROLE_ARN;
+      this.roleArn = process.env[Config.ENV_PREFIX + 'ROLE_ARN'];
     }
 
     if (!this.roleArn) {
-      throw new Error('roleArn does not exist and env ALIBABA_CLOUD_ROLE_ARN is null.');
+      throw new Error(`roleArn does not exist and env ${Config.ENV_PREFIX}ROLE_ARN is null.`);
     }
 
     if (!this.oidcProviderArn) {
-      throw new Error('oidcProviderArn does not exist and env ALIBABA_CLOUD_OIDC_PROVIDER_ARN is null.');
+      throw new Error(`oidcProviderArn does not exist and env ${Config.ENV_PREFIX}OIDC_PROVIDER_ARN is null.`);
     }
 
     if (!this.oidcTokenFilePath) {
-      throw new Error('oidcTokenFilePath is not exists and env ALIBABA_CLOUD_OIDC_TOKEN_FILE is null.');
+      throw new Error(`oidcTokenFilePath is not exists and env ${Config.ENV_PREFIX}OIDC_TOKEN_FILE is null.`);
     }
 
     if (!this.roleSessionName) {
@@ -120,22 +120,22 @@ class OIDCRoleArnCredentialsProviderBuilder {
     }
 
     if (!this.stsRegionId) {
-      this.stsRegionId = process.env.ALIBABA_CLOUD_STS_REGION;
+      this.stsRegionId = process.env[Config.ENV_PREFIX + 'STS_REGION'];
     }
 
     if (!this.enableVpc) {
-      this.enableVpc = process.env.ALIBABA_CLOUD_VPC_ENDPOINT_ENABLED && process.env.ALIBABA_CLOUD_VPC_ENDPOINT_ENABLED.toLowerCase() === 'true' || false;
+      this.enableVpc = process.env[Config.ENV_PREFIX + 'VPC_ENDPOINT_ENABLED'] && process.env[Config.ENV_PREFIX + 'VPC_ENDPOINT_ENABLED'].toLowerCase() === 'true' || false;
     }
 
     // sts endpoint
     if (!this.stsEndpoint) {
       if (this.stsRegionId) {
         if (this.enableVpc) {
-          this.stsEndpoint = `sts-vpc.${this.stsRegionId}.aliyuncs.com`
+          this.stsEndpoint = `sts-vpc.${this.stsRegionId}.${Config.ENDPOINT_SUFFIX}`
         } else {
-          this.stsEndpoint = `sts.${this.stsRegionId}.aliyuncs.com`
+          this.stsEndpoint = `sts.${this.stsRegionId}.${Config.ENDPOINT_SUFFIX}`
         }
-      } else { this.stsEndpoint = 'sts.aliyuncs.com' }
+      } else { this.stsEndpoint = Config.STS_DEFAULT_ENDPOINT }
     }
 
     return new OIDCRoleArnCredentialsProvider(this);

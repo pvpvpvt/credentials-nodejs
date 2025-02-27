@@ -7,6 +7,7 @@ import Credentials from '../credentials';
 import CredentialsProvider from '../credentials_provider'
 import { doRequest, Request } from './http';
 import { Session, SessionCredentialProvider, STALE_TIME } from './session';
+import { Config } from '../configure/config';
 
 const log = debug('sign');
 
@@ -34,18 +35,18 @@ class RAMRoleARNCredentialsProviderBuilder {
       throw new Error('must specify a previous credentials provider to asssume role');
     }
 
-    if (!(this.roleArn = this.roleArn || process.env.ALIBABA_CLOUD_ROLE_ARN)) throw new Error('the RoleArn is empty');
+    if (!(this.roleArn = this.roleArn || process.env[Config.ENV_PREFIX + 'ROLE_ARN'])) throw new Error('the RoleArn is empty');
 
     if (!this.roleSessionName) {
-      this.roleSessionName = process.env.ALIBABA_CLOUD_ROLE_SESSION_NAME || 'credentials-nodejs-' + Date.now();
+      this.roleSessionName = process.env[Config.ENV_PREFIX + 'ROLE_SESSION_NAME'] || 'credentials - nodejs - ' + Date.now();
     }
 
     if (!this.stsRegionId) {
-      this.stsRegionId = process.env.ALIBABA_CLOUD_STS_REGION;
+      this.stsRegionId = process.env[Config.ENV_PREFIX + 'STS_REGION'];
     }
 
     if (!this.enableVpc) {
-      this.enableVpc = process.env.ALIBABA_CLOUD_VPC_ENDPOINT_ENABLED && process.env.ALIBABA_CLOUD_VPC_ENDPOINT_ENABLED.toLowerCase() === 'true' || false;
+      this.enableVpc = process.env[Config.ENV_PREFIX + 'VPC_ENDPOINT_ENABLED'] && process.env[Config.ENV_PREFIX + 'VPC_ENDPOINT_ENABLED'].toLowerCase() === 'true' || false;
     }
 
     // duration seconds
@@ -62,11 +63,11 @@ class RAMRoleARNCredentialsProviderBuilder {
     if (!this.stsEndpoint) {
       if (this.stsRegionId) {
         if (this.enableVpc) {
-          this.stsEndpoint = `sts-vpc.${this.stsRegionId}.aliyuncs.com`
+          this.stsEndpoint = `sts-vpc.${this.stsRegionId}.${Config.ENDPOINT_SUFFIX}`
         } else {
-          this.stsEndpoint = `sts.${this.stsRegionId}.aliyuncs.com`
+          this.stsEndpoint = `sts.${this.stsRegionId}.${Config.ENDPOINT_SUFFIX}`
         }
-      } else { this.stsEndpoint = 'sts.aliyuncs.com' }
+      } else { this.stsEndpoint = Config.STS_DEFAULT_ENDPOINT }
     }
 
     return new RAMRoleARNCredentialsProvider(this);

@@ -10,6 +10,7 @@ import StaticSTSCredentialsProvider from './static_sts';
 import RAMRoleARNCredentialsProvider from './ram_role_arn';
 import OIDCRoleArnCredentialsProvider from './oidc_role_arn';
 import ECSRAMRoleCredentialsProvider from './ecs_ram_role';
+import { Config } from '../configure/config';
 
 const readFileAsync = promisify(readFile);
 
@@ -18,13 +19,13 @@ class CLIProfileCredentialsProviderBuilder {
   build(): CLIProfileCredentialsProvider {
     // 优先级：
     // 1. 使用显示指定的 profileName
-    // 2. 使用环境变量（ALIBABA_CLOUD_PROFILE）制定的 profileName
+    // 2. 使用环境变量制定的 profileName
     // 3. 使用 CLI 配置中的当前 profileName
     if (!this.profileName) {
-      this.profileName = process.env.ALIBABA_CLOUD_PROFILE;
+      this.profileName = process.env[Config.ENV_PREFIX + 'PROFILE'];
     }
 
-    if (process.env.ALIBABA_CLOUD_CLI_PROFILE_DISABLED && process.env.ALIBABA_CLOUD_CLI_PROFILE_DISABLED.toLowerCase() === 'true') {
+    if (process.env[Config.ENV_PREFIX + 'CLI_PROFILE_DISABLED'] && process.env[Config.ENV_PREFIX + 'CLI_PROFILE_DISABLED'].toLowerCase() === 'true') {
       throw new Error('the CLI profile is disabled');
     }
 
@@ -67,13 +68,13 @@ export async function getConfiguration(cfgPath: string): Promise<Configuration> 
   try {
     content = await readFileAsync(cfgPath, 'utf8');
   } catch (ex) {
-    throw new Error(`reading aliyun cli config from '${cfgPath}' failed.`);
+    throw new Error(`reading cli config from '${cfgPath}' failed.`);
   }
   let conf: Configuration;
   try {
     conf = JSON.parse(content) as Configuration;
   } catch (ex) {
-    throw new Error(`parse aliyun cli config from '${cfgPath}' failed: ${content}`);
+    throw new Error(`parse cli config from '${cfgPath}' failed: ${content}`);
   }
 
   if (!conf || !conf.profiles || conf.profiles.length === 0) {
@@ -109,58 +110,58 @@ export default class CLIProfileCredentialsProvider implements CredentialsProvide
   private getCredentialsProvider(conf: Configuration, profileName: string): CredentialsProvider {
     const p = getProfile(conf, profileName);
     switch (p.mode) {
-    case 'AK':
-      return StaticAKCredentialsProvider.builder()
-        .withAccessKeyId(p.access_key_id)
-        .withAccessKeySecret(p.access_key_secret)
-        .build();
-    case 'StsToken':
-      return StaticSTSCredentialsProvider.builder()
-        .withAccessKeyId(p.access_key_id)
-        .withAccessKeySecret(p.access_key_secret)
-        .withSecurityToken(p.sts_token)
-        .build();
-    case 'RamRoleArn': {
-      const previousProvider = StaticAKCredentialsProvider.builder()
-        .withAccessKeyId(p.access_key_id)
-        .withAccessKeySecret(p.access_key_secret)
-        .build();
+      case 'AK':
+        return StaticAKCredentialsProvider.builder()
+          .withAccessKeyId(p.access_key_id)
+          .withAccessKeySecret(p.access_key_secret)
+          .build();
+      case 'StsToken':
+        return StaticSTSCredentialsProvider.builder()
+          .withAccessKeyId(p.access_key_id)
+          .withAccessKeySecret(p.access_key_secret)
+          .withSecurityToken(p.sts_token)
+          .build();
+      case 'RamRoleArn': {
+        const previousProvider = StaticAKCredentialsProvider.builder()
+          .withAccessKeyId(p.access_key_id)
+          .withAccessKeySecret(p.access_key_secret)
+          .build();
 
-      return RAMRoleARNCredentialsProvider.builder()
-        .withCredentialsProvider(previousProvider)
-        .withRoleArn(p.ram_role_arn)
-        .withRoleSessionName(p.ram_session_name)
-        .withDurationSeconds(p.expired_seconds)
-        .withStsRegionId(p.sts_region)
-        .withStsEndpoint(p.sts_endpoint)
-        .withEnableVpc(p.enable_vpc)
-        .build();
-    }
-    case 'EcsRamRole':
-      return ECSRAMRoleCredentialsProvider.builder().withRoleName(p.ram_role_name).build();
-    case 'OIDC':
-      return OIDCRoleArnCredentialsProvider.builder()
-        .withOIDCTokenFilePath(p.oidc_token_file)
-        .withOIDCProviderArn(p.oidc_provider_arn)
-        .withRoleArn(p.ram_role_arn)
-        .withStsRegionId(p.sts_region)
-        .withDurationSeconds(p.expired_seconds)
-        .withRoleSessionName(p.ram_session_name)
-        .withDurationSeconds(p.duration_seconds)
-        .withEnableVpc(p.enable_vpc)
-        .build();
-    case 'ChainableRamRoleArn': {
-      const previousProvider = this.getCredentialsProvider(conf, p.source_profile);
-      return RAMRoleARNCredentialsProvider.builder()
-        .withCredentialsProvider(previousProvider)
-        .withRoleArn(p.ram_role_arn)
-        .withRoleSessionName(p.ram_session_name)
-        .withDurationSeconds(p.expired_seconds)
-        .withStsRegionId(p.sts_region)
-        .build();
-    }
-    default:
-      throw new Error(`unsupported profile mode '${p.mode}'`);
+        return RAMRoleARNCredentialsProvider.builder()
+          .withCredentialsProvider(previousProvider)
+          .withRoleArn(p.ram_role_arn)
+          .withRoleSessionName(p.ram_session_name)
+          .withDurationSeconds(p.expired_seconds)
+          .withStsRegionId(p.sts_region)
+          .withStsEndpoint(p.sts_endpoint)
+          .withEnableVpc(p.enable_vpc)
+          .build();
+      }
+      case 'EcsRamRole':
+        return ECSRAMRoleCredentialsProvider.builder().withRoleName(p.ram_role_name).build();
+      case 'OIDC':
+        return OIDCRoleArnCredentialsProvider.builder()
+          .withOIDCTokenFilePath(p.oidc_token_file)
+          .withOIDCProviderArn(p.oidc_provider_arn)
+          .withRoleArn(p.ram_role_arn)
+          .withStsRegionId(p.sts_region)
+          .withDurationSeconds(p.expired_seconds)
+          .withRoleSessionName(p.ram_session_name)
+          .withDurationSeconds(p.duration_seconds)
+          .withEnableVpc(p.enable_vpc)
+          .build();
+      case 'ChainableRamRoleArn': {
+        const previousProvider = this.getCredentialsProvider(conf, p.source_profile);
+        return RAMRoleARNCredentialsProvider.builder()
+          .withCredentialsProvider(previousProvider)
+          .withRoleArn(p.ram_role_arn)
+          .withRoleSessionName(p.ram_session_name)
+          .withDurationSeconds(p.expired_seconds)
+          .withStsRegionId(p.sts_region)
+          .build();
+      }
+      default:
+        throw new Error(`unsupported profile mode '${p.mode}'`);
     }
   }
 
@@ -170,7 +171,7 @@ export default class CLIProfileCredentialsProvider implements CredentialsProvide
         throw new Error('cannot found home dir');
       }
 
-      const cfgPath = path.join(this.homedir, '.aliyun/config.json');
+      const cfgPath = path.join(this.homedir, `${Config.CLI_CONFIG_DIR}/config.json`);
 
       const conf = await getConfiguration(cfgPath);
       const profileName = this.profileName || conf.current;

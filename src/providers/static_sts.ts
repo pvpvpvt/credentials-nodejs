@@ -1,6 +1,7 @@
 
 import Credentials from '../credentials';
 import CredentialsProvider from '../credentials_provider';
+import { Config } from '../configure/config';
 
 /**
  * @internal
@@ -27,7 +28,7 @@ export class StaticSTSCredentialsProviderBuilder {
 
   public build(): StaticSTSCredentialsProvider {
     if (!this.accessKeyId) {
-      this.accessKeyId = process.env['ALIBABA_CLOUD_ACCESS_KEY_ID'];
+      this.accessKeyId = process.env[Config.ENV_PREFIX + 'ACCESS_KEY_ID'];
     }
 
     if (!this.accessKeyId) {
@@ -35,7 +36,7 @@ export class StaticSTSCredentialsProviderBuilder {
     }
 
     if (!this.accessKeySecret) {
-      this.accessKeySecret = process.env['ALIBABA_CLOUD_ACCESS_KEY_SECRET'];
+      this.accessKeySecret = process.env[Config.ENV_PREFIX + 'ACCESS_KEY_SECRET'];
     }
 
     if (!this.accessKeySecret) {
@@ -43,7 +44,7 @@ export class StaticSTSCredentialsProviderBuilder {
     }
 
     if (!this.securityToken) {
-      this.securityToken = process.env['ALIBABA_CLOUD_SECURITY_TOKEN'];
+      this.securityToken = process.env[Config.ENV_PREFIX + 'SECURITY_TOKEN'];
     }
 
     if (!this.securityToken) {
@@ -72,7 +73,7 @@ export default class StaticSTSCredentialsProvider implements CredentialsProvider
     this.securityToken = builder.securityToken;
   }
 
-  getProviderName() : string {
+  getProviderName(): string {
     return 'static_sts';
   }
 

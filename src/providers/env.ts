@@ -1,5 +1,6 @@
 import Credentials from '../credentials';
 import CredentialsProvider from '../credentials_provider';
+import { Config } from '../configure/config';
 
 export default class EnvironmentVariableCredentialsProvider implements CredentialsProvider {
   static builder() {
@@ -7,17 +8,17 @@ export default class EnvironmentVariableCredentialsProvider implements Credentia
   }
 
   async getCredentials(): Promise<Credentials> {
-    const accessKeyId = process.env.ALIBABA_CLOUD_ACCESS_KEY_ID;
+    const accessKeyId = process.env[Config.ENV_PREFIX + 'ACCESS_KEY_ID'];
     if (!accessKeyId) {
-      throw new Error('unable to get credentials from enviroment variables, Access key ID must be specified via environment variable (ALIBABA_CLOUD_ACCESS_KEY_ID)')
+      throw new Error(`unable to get credentials from enviroment variables, Access key ID must be specified via environment variable (${Config.ENV_PREFIX}ACCESS_KEY_ID)`)
     }
 
-    const accessKeySecret = process.env.ALIBABA_CLOUD_ACCESS_KEY_SECRET;
+    const accessKeySecret = process.env[Config.ENV_PREFIX + 'ACCESS_KEY_SECRET'];
     if (!accessKeySecret) {
-      throw new Error('unable to get credentials from enviroment variables, Access key secret must be specified via environment variable (ALIBABA_CLOUD_ACCESS_KEY_SECRET)')
+      throw new Error(`unable to get credentials from enviroment variables, Access key secret must be specified via environment variable (${Config.ENV_PREFIX}ACCESS_KEY_SECRET)`)
     }
 
-    const securityToken = process.env.ALIBABA_CLOUD_SECURITY_TOKEN;
+    const securityToken = process.env[Config.ENV_PREFIX + 'SECURITY_TOKEN'];
 
     return Credentials.builder()
       .withAccessKeyId(accessKeyId)

@@ -1,6 +1,7 @@
 
 import Credentials from '../credentials';
 import CredentialsProvider from '../credentials_provider';
+import { Config } from '../configure/config';
 
 /**
  * @internal
@@ -21,7 +22,7 @@ export class StaticAKCredentialsProviderBuilder {
 
   public build(): StaticAKCredentialsProvider {
     if (!this.accessKeyId) {
-      this.accessKeyId = process.env['ALIBABA_CLOUD_ACCESS_KEY_ID'];
+      this.accessKeyId = process.env[Config.ENV_PREFIX + 'ACCESS_KEY_ID'];
     }
 
     if (!this.accessKeyId) {
@@ -29,7 +30,7 @@ export class StaticAKCredentialsProviderBuilder {
     }
 
     if (!this.accessKeySecret) {
-      this.accessKeySecret = process.env['ALIBABA_CLOUD_ACCESS_KEY_SECRET'];
+      this.accessKeySecret = process.env[Config.ENV_PREFIX + 'ACCESS_KEY_SECRET'];
     }
 
     if (!this.accessKeySecret) {
@@ -51,16 +52,16 @@ export default class StaticAKCredentialsProvider implements CredentialsProvider 
   private readonly accessKeyId: string;
   private readonly accessKeySecret: string;
 
-  public constructor(builder : StaticAKCredentialsProviderBuilder) {
+  public constructor(builder: StaticAKCredentialsProviderBuilder) {
     this.accessKeyId = builder.accessKeyId;
     this.accessKeySecret = builder.accessKeySecret;
   }
 
-  getProviderName() : string {
+  getProviderName(): string {
     return 'static_ak';
   }
 
-  async getCredentials() : Promise<Credentials> {
+  async getCredentials(): Promise<Credentials> {
     const credentials = Credentials
       .builder()
       .withAccessKeyId(this.accessKeyId).withAccessKeySecret(this.accessKeySecret)
